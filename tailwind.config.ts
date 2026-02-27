@@ -46,6 +46,9 @@ const config: Config = {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
+        'hero-bg': 'hsl(var(--hero-bg))',
+        'hero-foreground': 'hsl(var(--hero-foreground))',
+        'section-alt': 'hsl(var(--section-alt))',
         chart: {
           '1': 'hsl(var(--chart-1))',
           '2': 'hsl(var(--chart-2))',
@@ -63,6 +66,10 @@ const config: Config = {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+      },
+      fontFamily: {
+        sans: ['var(--font-inter)'],
+        serif: ['var(--font-lora)'],
       },
       borderRadius: {
         lg: 'var(--radius)',

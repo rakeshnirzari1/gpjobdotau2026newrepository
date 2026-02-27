@@ -36,17 +36,15 @@ export function SearchForm({ initialFilter, onSearch }: SearchFormProps = {}) {
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
-  // Set placeholder text based on filter
   const getPlaceholderText = () => {
     if (initialFilter === "dpa") {
-      return "Search DPA jobs by title, location, or keywords"
+      return "Search DPA jobs by title, location, or keywords..."
     } else if (initialFilter && initialFilter.startsWith("mmm")) {
-      return `Search ${initialFilter.toUpperCase()} jobs by title, location, or keywords`
+      return `Search ${initialFilter.toUpperCase()} jobs by title, location, or keywords...`
     }
-    return "Search jobs by title, location, or keywords"
+    return "Search by job title, location, or keywords..."
   }
 
-  // Handle the debounced search term
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedTerm(searchTerm)
@@ -57,7 +55,6 @@ export function SearchForm({ initialFilter, onSearch }: SearchFormProps = {}) {
     }
   }, [searchTerm])
 
-  // Fetch suggestions based on the debounced term
   useEffect(() => {
     const fetchJobSuggestions = async () => {
       if (debouncedTerm.length < 2) {
@@ -74,15 +71,11 @@ export function SearchForm({ initialFilter, onSearch }: SearchFormProps = {}) {
       setOpen(true)
 
       try {
-        console.log("Fetching job suggestions for:", debouncedTerm)
-
-        // Include filter in the API request if it exists
         const filterParam = initialFilter ? `&filter=${initialFilter}` : ""
 
-        // Use relative URL for client-side fetching
         const response = await fetch(
           `/api/jobs/search/suggestions?q=${encodeURIComponent(debouncedTerm.trim())}${filterParam}`,
-          { cache: "no-store" }, // Ensure we don't get cached results
+          { cache: "no-store" },
         )
 
         if (!response.ok) {
@@ -90,7 +83,6 @@ export function SearchForm({ initialFilter, onSearch }: SearchFormProps = {}) {
         }
 
         const data = await response.json()
-        console.log("Suggestions response:", data)
 
         if (data.error) {
           throw new Error(data.error)
@@ -99,7 +91,7 @@ export function SearchForm({ initialFilter, onSearch }: SearchFormProps = {}) {
         setSuggestions(data.jobs || [])
         setHasSearched(true)
         setOpen(data.jobs && data.jobs.length > 0)
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching job suggestions:", error)
         setError(error.message || "Failed to fetch suggestions")
         setSuggestions([])
@@ -121,7 +113,6 @@ export function SearchForm({ initialFilter, onSearch }: SearchFormProps = {}) {
       return
     }
 
-    // Include filter in the search URL if it exists
     const filterParam = initialFilter ? `&filter=${initialFilter}` : ""
 
     if (searchTerm) {
@@ -141,60 +132,56 @@ export function SearchForm({ initialFilter, onSearch }: SearchFormProps = {}) {
     }
   }
 
-  // Handle input focus
   const handleInputFocus = () => {
     if (searchTerm.length >= 2 && suggestions.length > 0) {
       setOpen(true)
     }
   }
 
-  // Handle clicking outside to close dropdown
-  const handleClickOutside = () => {
-    setOpen(false)
-  }
-
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 relative z-20 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-center">
+    <div className="bg-card rounded-xl border border-border shadow-lg p-6 md:p-8 relative z-20 max-w-4xl mx-auto -mt-8">
+      <h2 className="text-xl md:text-2xl font-serif font-bold mb-1 text-center text-card-foreground">
         {initialFilter === "dpa"
-          ? "Find DPA GP Jobs in Australia"
+          ? "Find DPA GP Jobs"
           : initialFilter && initialFilter.startsWith("mmm")
-            ? `Find ${initialFilter.toUpperCase()} GP Jobs in Australia`
-            : "Find GP Jobs in Australia"}
+            ? `Find ${initialFilter.toUpperCase()} GP Jobs`
+            : "Find Your Next GP Position"}
       </h2>
+      <p className="text-sm text-muted-foreground text-center mb-5">
+        Browse opportunities across Australia
+      </p>
       <form onSubmit={handleSearch} className="flex flex-col gap-4">
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col md:flex-row gap-3">
           <div className="flex-1 relative">
             <div className="relative w-full">
               <Input
                 ref={inputRef}
                 type="text"
                 placeholder={getPlaceholderText()}
-                className="w-full pl-10"
+                className="w-full pl-10 h-12 bg-background border-border text-foreground placeholder:text-muted-foreground"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onFocus={handleInputFocus}
                 autoComplete="off"
               />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
             </div>
 
-            {/* Manually controlled dropdown instead of using Popover */}
             {open && (
-              <div className="absolute z-50 w-full bg-white rounded-md border border-gray-200 shadow-md mt-1">
+              <div className="absolute z-50 w-full bg-card rounded-lg border border-border shadow-lg mt-1">
                 <Command>
                   <CommandList>
                     {isLoading && (
                       <div className="py-6 text-center">
-                        <Loader2 className="h-6 w-6 animate-spin mx-auto text-emerald-600" />
-                        <p className="text-sm text-gray-500 mt-2">Searching for jobs...</p>
+                        <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                        <p className="text-sm text-muted-foreground mt-2">Searching for jobs...</p>
                       </div>
                     )}
 
                     {error && !isLoading && (
                       <div className="py-6 text-center">
-                        <p className="text-sm text-red-500">Error: {error}</p>
-                        <p className="text-xs text-gray-500 mt-2">Please try again or refine your search</p>
+                        <p className="text-sm text-destructive">Error: {error}</p>
+                        <p className="text-xs text-muted-foreground mt-2">Please try again or refine your search</p>
                       </div>
                     )}
 
@@ -207,8 +194,8 @@ export function SearchForm({ initialFilter, onSearch }: SearchFormProps = {}) {
                         {suggestions.map((job) => (
                           <CommandItem key={job.id} onSelect={() => handleSelect(job)}>
                             <div className="flex flex-col">
-                              <span className="font-medium">{job.title}</span>
-                              <span className="text-sm text-gray-500">
+                              <span className="font-medium text-card-foreground">{job.title}</span>
+                              <span className="text-sm text-muted-foreground">
                                 {job.practice_name} - {job.suburb}, {job.state}
                               </span>
                             </div>
@@ -221,14 +208,14 @@ export function SearchForm({ initialFilter, onSearch }: SearchFormProps = {}) {
               </div>
             )}
           </div>
-          <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700">
+          <Button type="submit" className="h-12 px-8 bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
             Search Jobs
           </Button>
         </div>
 
         {initialFilter && (
-          <div className="flex items-center justify-end mt-2">
-            <div className="text-sm text-gray-500">
+          <div className="flex items-center justify-end mt-1">
+            <div className="text-xs text-muted-foreground px-2.5 py-1 bg-secondary rounded-full">
               {initialFilter === "dpa" ? "DPA Only" : initialFilter.toUpperCase()}
             </div>
           </div>

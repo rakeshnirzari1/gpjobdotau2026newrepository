@@ -18,15 +18,12 @@ export function RecentJobs() {
     const fetchJobs = async () => {
       try {
         setIsLoading(true)
-        console.log("Fetching jobs from API...")
         const response = await fetch("/api/jobs?limit=12", {
           cache: "no-store",
           headers: {
             "Cache-Control": "no-cache",
           },
         })
-
-        console.log("API response status:", response.status)
 
         if (!response.ok) {
           const errorText = await response.text()
@@ -35,16 +32,13 @@ export function RecentJobs() {
         }
 
         const data = await response.json()
-        console.log("Jobs API response:", data)
 
-        // Ensure we're handling the response correctly
         if (!data.jobs || !Array.isArray(data.jobs)) {
-          console.error("Invalid jobs data format:", data)
           setJobs([])
         } else {
           setJobs(data.jobs)
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error fetching recent jobs:", err)
         setError(`Failed to load recent jobs: ${err.message}`)
       } finally {
@@ -57,18 +51,20 @@ export function RecentJobs() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(3)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
+          <Card key={i} className="bg-card border-border overflow-hidden">
             <CardContent className="p-6">
-              <div className="h-6 bg-gray-200 rounded mb-4"></div>
-              <div className="h-4 bg-gray-200 rounded mb-2 w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded mb-4 w-1/2"></div>
-              <div className="h-20 bg-gray-200 rounded"></div>
+              <div className="h-5 bg-muted rounded-md mb-4 w-3/4 animate-pulse" />
+              <div className="h-4 bg-muted rounded-md mb-3 w-1/2 animate-pulse" />
+              <div className="flex gap-2 mb-4">
+                <div className="h-6 bg-muted rounded-full w-14 animate-pulse" />
+                <div className="h-6 bg-muted rounded-full w-14 animate-pulse" />
+              </div>
+              <div className="h-4 bg-muted rounded-md mb-2 animate-pulse" />
+              <div className="h-4 bg-muted rounded-md mb-4 animate-pulse" />
+              <div className="h-16 bg-muted rounded-md animate-pulse" />
             </CardContent>
-            <CardFooter className="p-6 pt-0">
-              <div className="h-10 bg-gray-200 rounded w-full"></div>
-            </CardFooter>
           </Card>
         ))}
       </div>
@@ -77,83 +73,103 @@ export function RecentJobs() {
 
   if (error) {
     return (
-      <div className="text-center">
-        <p className="text-red-500">{error}</p>
-        <p className="text-gray-500 mt-2">Please try refreshing the page or contact support if the problem persists.</p>
+      <div className="text-center py-12">
+        <p className="text-destructive font-medium">{error}</p>
+        <p className="text-muted-foreground mt-2 text-sm">Please try refreshing the page or contact support if the problem persists.</p>
       </div>
     )
   }
 
   if (jobs.length === 0) {
     return (
-      <div className="text-center">
-        <p className="text-gray-500">No jobs available at the moment.</p>
-        <p className="text-gray-500 mt-2">Check back soon for new opportunities!</p>
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">No jobs available at the moment.</p>
+        <p className="text-muted-foreground mt-1 text-sm">Check back soon for new opportunities!</p>
       </div>
     )
   }
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Recent GP Jobs</h2>
+      <div className="flex justify-between items-end mb-8">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Recent GP Jobs</h2>
+          <p className="text-muted-foreground mt-1 text-sm">Latest opportunities across Australia</p>
+        </div>
         <Link href="/all-jobs">
-          <Button variant="outline">View All Jobs</Button>
+          <Button variant="outline" size="sm" className="gap-2 border-border text-foreground hover:bg-muted">
+            View All
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Button>
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {jobs.map((job) => (
-          <Card key={job.id} className="hover:shadow-md transition-shadow">
+          <Card key={job.id} className="bg-card border-border hover:shadow-md hover:border-primary/20 transition-all duration-200 group overflow-hidden">
             <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-xl font-semibold mb-1 line-clamp-2">
-                    <Link href={`/jobs/${job.slug}`} className="hover:text-emerald-600">
+              <div className="flex items-start justify-between mb-3 gap-3">
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-card-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                    <Link href={`/jobs/${job.slug}`}>
                       {job.title}
                     </Link>
                   </h3>
-                  <p className="text-gray-600 mb-2">{job.practice_name}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{job.practice_name}</p>
                 </div>
                 {job.logo_url && (
-                  <div className="relative h-12 w-12 rounded-md overflow-hidden border border-gray-200 flex-shrink-0">
+                  <div className="relative h-10 w-10 rounded-lg overflow-hidden border border-border flex-shrink-0 bg-muted">
                     <Image
                       src={job.logo_url || "/placeholder.svg"}
                       alt={`${job.practice_name} logo`}
                       fill
                       className="object-contain"
-                      sizes="48px"
+                      sizes="40px"
                     />
                   </div>
                 )}
               </div>
 
-              <div className="flex flex-wrap gap-2 mb-3">
-                <Badge variant={job.is_dpa ? "default" : "outline"} className={job.is_dpa ? "bg-emerald-600" : ""}>
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                <Badge
+                  variant={job.is_dpa ? "default" : "outline"}
+                  className={
+                    job.is_dpa
+                      ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 text-xs"
+                      : "border-border text-muted-foreground text-xs"
+                  }
+                >
                   {job.is_dpa ? "DPA" : "Non-DPA"}
                 </Badge>
-                {job.mmm_classification && <Badge variant="outline">{job.mmm_classification}</Badge>}
-                <Badge variant="secondary">{job.job_type}</Badge>
+                {job.mmm_classification && (
+                  <Badge variant="outline" className="border-border text-muted-foreground text-xs">
+                    {job.mmm_classification}
+                  </Badge>
+                )}
+                <Badge className="bg-secondary text-secondary-foreground border-0 text-xs">
+                  {job.job_type}
+                </Badge>
               </div>
 
-              <div className="flex items-center text-gray-600 mb-3">
-                <MapPin className="h-4 w-4 mr-2" />
-                <span>
+              <div className="flex items-center text-muted-foreground mb-2 text-sm">
+                <MapPin className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
+                <span className="truncate">
                   {job.suburb}, {job.state}
                 </span>
               </div>
 
-              <div className="flex items-center text-gray-600 mb-4">
-                <Clock className="h-4 w-4 mr-2" />
+              <div className="flex items-center text-muted-foreground mb-4 text-sm">
+                <Clock className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
                 <span>Posted {formatDistance(new Date(job.created_at), new Date(), { addSuffix: true })}</span>
               </div>
 
-              <p className="text-gray-700 line-clamp-3">{job.description}</p>
+              <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{job.description}</p>
             </CardContent>
-            <CardFooter className="p-6 pt-0">
+            <CardFooter className="px-6 pb-6 pt-0">
               <Link href={`/jobs/${job.slug}`} className="w-full">
-                <Button variant="outline" className="w-full">
-                  View Details <ArrowRight className="ml-2 h-4 w-4" />
+                <Button variant="outline" size="sm" className="w-full border-border text-foreground hover:bg-muted hover:border-primary/20 gap-2">
+                  View Details
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
             </CardFooter>

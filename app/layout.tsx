@@ -1,11 +1,12 @@
 import type React from "react"
-import { Inter } from "next/font/google"
+import { Inter, Lora } from "next/font/google"
 import "./globals.css"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
+const lora = Lora({ subsets: ["latin"], variable: "--font-lora" })
 
 export const metadata = {
   title: "GPJob.au - GP Recruitment & Jobs in Australia",
@@ -49,8 +50,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className={`${inter.variable} ${lora.variable}`}>
+      <body className="font-sans">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <div className="flex flex-col min-h-screen">
             <Header />

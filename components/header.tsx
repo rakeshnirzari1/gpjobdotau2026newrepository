@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { Menu, X, LogIn, User } from "lucide-react"
+import { Menu, X, LogIn, User, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import {
@@ -25,15 +25,22 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [user, setUser] = useState<UserType>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [scrolled, setScrolled] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10)
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await fetch("/api/auth/me", {
-          // Add cache: 'no-store' to prevent caching
           cache: "no-store",
-          // Add a timestamp to prevent caching
           headers: {
             pragma: "no-cache",
             "cache-control": "no-cache",
@@ -76,68 +83,82 @@ export function Header() {
     }
   }
 
-  // Determine if the user is an admin
   const isAdmin = user?.email === "support@gpvacancy.com.au"
+  const isPractice = user?.userType === "practice" || (user as any)?.user_type === "practice"
 
-  // Determine if the user is a practice
-  const isPractice = user?.userType === "practice" || user?.user_type === "practice"
+  const navLinks = [
+    { href: "/all-jobs", label: "All Jobs" },
+    { href: "/for-practices", label: "For Practices" },
+    { href: "/for-doctors", label: "For Doctors" },
+    { href: "/pricing", label: "Pricing" },
+    { href: "/resources", label: "Resources" },
+    { href: "/about", label: "About" },
+  ]
 
   return (
-    <header className="bg-white border-b sticky top-0 z-50">
+    <header
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-card/95 backdrop-blur-md shadow-sm border-b border-border"
+          : "bg-card border-b border-border"
+      }`}
+    >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold text-emerald-600">GPJob.au</span>
+          <Link href="/" className="flex items-center gap-1.5">
+            <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary">
+              <span className="text-sm font-bold text-primary-foreground">GP</span>
+            </div>
+            <span className="text-xl font-serif font-bold text-foreground">
+              Job<span className="text-primary">.au</span>
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/all-jobs" className="text-gray-700 hover:text-emerald-600 font-medium">
-              All Jobs
-            </Link>
-            <Link href="/for-practices" className="text-gray-700 hover:text-emerald-600 font-medium">
-              For Practices
-            </Link>
-            <Link href="/for-doctors" className="text-gray-700 hover:text-emerald-600 font-medium">
-              For Doctors
-            </Link>
-            <Link href="/pricing" className="text-gray-700 hover:text-emerald-600 font-medium">
-              Pricing
-            </Link>
-            <Link href="/resources" className="text-gray-700 hover:text-emerald-600 font-medium">
-              Resources
-            </Link>
-            <Link href="/about" className="text-gray-700 hover:text-emerald-600 font-medium">
-              About
-            </Link>
+          <nav className="hidden lg:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
 
+          {/* Desktop Actions */}
+          <div className="hidden lg:flex items-center gap-3">
             {isLoading ? (
-              <div className="w-24 h-10"></div>
+              <div className="w-24 h-9" />
             ) : user ? (
               <>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="flex items-center">
-                      <User className="h-4 w-4 mr-2" />
+                    <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+                      <div className="flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
                       {user.name.split(" ")[0]}
+                      <ChevronDown className="h-3.5 w-3.5" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuLabel className="text-foreground">My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {isAdmin && (
-                      <DropdownMenuItem onClick={() => router.push("/admin")}>Admin Dashboard</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => router.push("/admin")} className="text-foreground">Admin Dashboard</DropdownMenuItem>
                     )}
                     {isPractice && (
-                      <DropdownMenuItem onClick={() => router.push("/dashboard")}>Dashboard</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => router.push("/dashboard")} className="text-foreground">Dashboard</DropdownMenuItem>
                     )}
-                    <DropdownMenuItem onClick={handleLogout}>Log Out</DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout} className="text-foreground">Log Out</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
 
                 {isPractice && (
                   <Link href="/dashboard/jobs/new">
-                    <Button variant="default" className="bg-emerald-600 hover:bg-emerald-700">
+                    <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                       Post a Job
                     </Button>
                   </Link>
@@ -145,91 +166,62 @@ export function Header() {
               </>
             ) : (
               <>
-                <div className="flex items-center space-x-4">
-                  <Link href="/login">
-                    <Button variant="outline" className="flex items-center">
-                      <LogIn className="h-4 w-4 mr-2" />
-                      Log In
-                    </Button>
-                  </Link>
-                  <Link href="/register">
-                    <Button variant="default" className="bg-emerald-600 hover:bg-emerald-700">
-                      Register
-                    </Button>
-                  </Link>
-                </div>
-
+                <Link href="/login">
+                  <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground">
+                    <LogIn className="h-4 w-4" />
+                    Log In
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button size="sm" variant="outline" className="border-primary/30 text-primary hover:bg-primary/5">
+                    Register
+                  </Button>
+                </Link>
                 <Link href="/register?type=practice">
-                  <Button variant="default" className="bg-emerald-600 hover:bg-emerald-700">
+                  <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                     Post a Job
                   </Button>
                 </Link>
               </>
             )}
-          </nav>
+          </div>
 
           {/* Mobile Menu Button */}
-          <button className="md:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          <button
+            className="lg:hidden p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </div>
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t">
-          <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
-            <Link
-              href="/all-jobs"
-              className="text-gray-700 hover:text-emerald-600 font-medium py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              All Jobs
-            </Link>
-            <Link
-              href="/for-practices"
-              className="text-gray-700 hover:text-emerald-600 font-medium py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              For Practices
-            </Link>
-            <Link
-              href="/for-doctors"
-              className="text-gray-700 hover:text-emerald-600 font-medium py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              For Doctors
-            </Link>
-            <Link
-              href="/pricing"
-              className="text-gray-700 hover:text-emerald-600 font-medium py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Pricing
-            </Link>
-            <Link
-              href="/resources"
-              className="text-gray-700 hover:text-emerald-600 font-medium py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Resources
-            </Link>
-            <Link
-              href="/about"
-              className="text-gray-700 hover:text-emerald-600 font-medium py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About
-            </Link>
+        <div className="lg:hidden bg-card border-t border-border">
+          <div className="container mx-auto px-4 py-3 flex flex-col gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <div className="border-t border-border my-2" />
 
             {isLoading ? (
-              <div className="h-10"></div>
+              <div className="h-10" />
             ) : user ? (
               <>
                 {isAdmin && (
                   <Link
                     href="/admin"
-                    className="text-gray-700 hover:text-emerald-600 font-medium py-2"
+                    className="px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Admin Dashboard
@@ -238,7 +230,7 @@ export function Header() {
                 {isPractice && (
                   <Link
                     href="/dashboard"
-                    className="text-gray-700 hover:text-emerald-600 font-medium py-2"
+                    className="px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Dashboard
@@ -249,26 +241,24 @@ export function Header() {
                     handleLogout()
                     setIsMenuOpen(false)
                   }}
-                  className="text-gray-700 hover:text-emerald-600 font-medium py-2 text-left"
+                  className="px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors text-left"
                 >
                   Log Out
                 </button>
               </>
             ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="text-gray-700 hover:text-emerald-600 font-medium py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Log In
+              <div className="flex flex-col gap-2 px-3 py-2">
+                <Link href="/login" onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="outline" className="w-full border-border text-foreground">
+                    Log In
+                  </Button>
                 </Link>
                 <Link href="/register" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="default" className="bg-emerald-600 hover:bg-emerald-700 w-full">
+                  <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
                     Register
                   </Button>
                 </Link>
-              </>
+              </div>
             )}
           </div>
         </div>

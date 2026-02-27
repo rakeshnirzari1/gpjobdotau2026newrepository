@@ -8,10 +8,8 @@ export const metadata = {
 }
 
 export default async function LoginPage() {
-  // Check if user is already logged in
   const user = await getCurrentUser()
   if (user) {
-    // Redirect to appropriate dashboard
     if (user.email === "support@gpvacancy.com.au") {
       redirect("/admin")
     } else {
@@ -20,11 +18,9 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-center">
-        <div className="w-full max-w-md">
-          <LoginForm />
-        </div>
+    <div className="bg-background min-h-[60vh] flex items-center justify-center py-16">
+      <div className="w-full max-w-md px-4">
+        <LoginForm />
       </div>
     </div>
   )
