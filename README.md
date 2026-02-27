@@ -1,4 +1,4 @@
-# Fork of GP Job Website
+# Fork of GP Job Websites
 
 *Automatically synced with your [v0.app](https://v0.app) deployments*
 
