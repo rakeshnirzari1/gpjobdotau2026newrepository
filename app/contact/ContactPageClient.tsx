@@ -69,7 +69,7 @@ export default function ContactPageClient() {
           <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center">
             <Mail className="h-10 w-10 text-emerald-600 mb-4" />
             <h3 className="text-lg font-semibold mb-2">Email</h3>
-            <p className="text-gray-600">admin@gpvacancy.com.au</p>
+            <p className="text-gray-600">support@gpvacancy.com.au</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center">
             <Phone className="h-10 w-10 text-emerald-600 mb-4" />
