@@ -34,6 +34,7 @@
     "lucide-react": "^0.294.0",
     "nanoid": "latest",
     "next": "14.0.3",
+    "next-themes": "^0.4.6",
     "nodemailer": "latest",
     "react": "^18",
     "react-dom": "^18",
